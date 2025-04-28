@@ -36,6 +36,10 @@ ARCH := native # best auto-tuning
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 
+# CFLAGS := -march=$(ARCH) -O3 -fopenmp -m64 -std=c++11 -g
+
+
+
 ifeq ($(OS),Windows_NT)
 else
 	UNAME_S := $(shell uname -s)

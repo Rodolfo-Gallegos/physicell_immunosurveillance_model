@@ -9,7 +9,17 @@ Sensitivity_Analysis/*.sh
 *.err
 project
 
+*.nsys-rep
+*.sqlite
+*.out
+*.folded
+*.perf
+*.data
+*.old
+
 *.pyc
 Sensitivity_Analysis/df_complete.db
 /Sensitivity_Analysis/*.svg
 /Sensitivity_Analysis/*.feather
+parallel_timings.csv
+.~lock.parallel_timings.csv#

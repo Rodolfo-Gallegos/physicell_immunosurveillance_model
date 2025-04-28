@@ -70,6 +70,8 @@
 double total_dead_tumor_cells = 0.0;
 double previous_dead_tumor_cells = 0.0;
 
+double total_parallel_time_in_T_Cell_recruitment = 0.0;
+
 double get_dead_tumor_cells() {
     return total_dead_tumor_cells;
 }
@@ -119,6 +121,11 @@ void update_T_cell_recruitment(double dt) {
 	int tumor_ID = get_cell_definition("tumor").type;
 	int num_tumor_cells = 0;
 
+	double parallel_time_in_this_call = 0.0; // tiempo solo de esta llamada
+    double start, end;
+	
+	start = omp_get_wtime();
+
 	#pragma omp parallel for reduction(+:num_tumor_cells)
 	for( int i=0; i < (*all_cells).size(); i++ )
 	{
@@ -129,6 +136,9 @@ void update_T_cell_recruitment(double dt) {
 		}
 	}
 
+	end = omp_get_wtime();
+	parallel_time_in_this_call += (end - start);
+
 	int new_M0_cells = int(num_tumor_cells * 0.05 / 24);
 	
 	recruit_cell("naive T cell", new_naive_T_cells, min_position_cells, max_position_cells);
@@ -136,6 +146,8 @@ void update_T_cell_recruitment(double dt) {
 
 	std::cout << std::endl << "Se agregaron " << new_naive_T_cells << " naive T cells y " << new_M0_cells << " M0 macrophages." << std::endl; 
 	std::cout << "Quedan " << num_tumor_cells << " tumor cells.\n" << std::endl; 
+
+	total_parallel_time_in_T_Cell_recruitment += parallel_time_in_this_call;
 }
 
 

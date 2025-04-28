@@ -76,6 +76,17 @@
 
 using namespace BioFVM;
 
+double total_parallel_time_in_update_all_cells = 0.0;
+double time_secretion_uptake = 0.0;
+double time_intracellular_update = 0.0;
+double time_bundled_phenotype_update = 0.0;
+double time_interactions = 0.0;
+double time_custom_rules = 0.0;
+double time_update_velocities = 0.0;
+double time_dynamic_spring_attachments = 0.0;
+double time_standard_cell_interactions = 0.0;
+double time_update_positions = 0.0;
+
 namespace PhysiCell{
 
 std::vector<Cell*> *all_cells;
@@ -123,7 +134,13 @@ void Cell_Container::update_all_cells(double t)
 
 void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double mechanics_dt_ , double diffusion_dt_ )
 {
-	// secretions and uptakes. Syncing with BioFVM is automated. 
+	// secretions and uptakes. Syncing with BioFVM is automated.
+
+	double parallel_time_in_this_call = 0.0; // tiempo solo de esta llamada
+
+    double start, end;
+	
+	start = omp_get_wtime();
 
 	#pragma omp parallel for 
 	for( int i=0; i < (*all_cells).size(); i++ )
@@ -133,6 +150,11 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			(*all_cells)[i]->phenotype.secretion.advance( (*all_cells)[i], (*all_cells)[i]->phenotype , diffusion_dt_ );
 		}
 	}
+
+	end = omp_get_wtime();
+	time_secretion_uptake += (end - start);
+	parallel_time_in_this_call += (end - start);
+
 	
 	//if it is the time for running cell cycle, do it!
 	double time_since_last_cycle= t- last_cell_cycle_time;
@@ -141,6 +163,8 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 	static double mechanics_dt_tolerance = 0.001 * mechanics_dt_; 
 
 	// intracellular update. called for every diffusion_dt, but actually depends on the intracellular_dt of each cell (as it can be noisy)
+
+	start = omp_get_wtime();
 
 	#pragma omp parallel for 
 	for( int i=0; i < (*all_cells).size(); i++ )
@@ -159,6 +183,10 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			}
 		}
 	}
+
+	end = omp_get_wtime();
+	time_intracellular_update += (end - start);
+	parallel_time_in_this_call += (end - start);
 	
 	if( time_since_last_cycle > phenotype_dt_ - 0.5 * diffusion_dt_ || !initialzed )
 	{
@@ -171,6 +199,7 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			time_since_last_cycle = phenotype_dt_;
 		}
 		
+		start = omp_get_wtime();
 		// new as of 1.2.1 -- bundles cell phenotype parameter update, volume update, geometry update, 
 		// checking for death, and advancing the cell cycle. Not motility, though. (that's in mechanics)
 		#pragma omp parallel for 
@@ -181,6 +210,10 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 				(*all_cells)[i]->advance_bundled_phenotype_functions( time_since_last_cycle ); 
 			}
 		}
+
+		end = omp_get_wtime();
+		time_bundled_phenotype_update += (end - start);
+		parallel_time_in_this_call += (end - start);
 		
 		// process divides / removes 
 		for( int i=0; i < cells_ready_to_divide.size(); i++ )
@@ -215,6 +248,7 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 		{ microenvironment.compute_all_gradient_vectors();  }
 		// end of new in Feb 2018 
 		
+		start = omp_get_wtime();
 		// perform interactions -- new in June 2020 
 		#pragma omp parallel for 
 		for( int i=0; i < (*all_cells).size(); i++ )
@@ -224,7 +258,13 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			{ evaluate_interactions( pC,pC->phenotype,time_since_last_mechanics ); }
 		}
 		
+		end = omp_get_wtime();
+		time_interactions += (end - start);
+		parallel_time_in_this_call += (end - start);
+
 		// perform custom computations 
+
+		start = omp_get_wtime();
 
 		#pragma omp parallel for 
 		for( int i=0; i < (*all_cells).size(); i++ )
@@ -235,7 +275,12 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			{ pC->functions.custom_cell_rule( pC,pC->phenotype,time_since_last_mechanics ); }
 		}
 		
-		// update velocities 
+		end = omp_get_wtime();
+		time_custom_rules += (end - start);
+		parallel_time_in_this_call += (end - start);
+
+		// Update velocities
+		start = omp_get_wtime();
 		
 		#pragma omp parallel for 
 		for( int i=0; i < (*all_cells).size(); i++ )
@@ -245,11 +290,17 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			{ pC->functions.update_velocity( pC,pC->phenotype,time_since_last_mechanics ); }
 		}
 
+		end = omp_get_wtime();
+		time_update_velocities += (end - start);
+		parallel_time_in_this_call += (end - start);
+
 		// new March 2023: 
 		// dynamic spring attachments, followed by built-in springs
 
 		if( PhysiCell_settings.disable_automated_spring_adhesions == false )
 		{
+			start = omp_get_wtime();
+
 			#pragma omp parallel for 
 			for( int i=0; i < (*all_cells).size(); i++ )
 			{
@@ -270,8 +321,13 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 					}
 				}
 			}	
+
+			end = omp_get_wtime();
+			time_dynamic_spring_attachments += (end - start);
+			parallel_time_in_this_call += (end - start);
 		}
 
+		start = omp_get_wtime();
 		// new March 2022: 
 		// run standard interactions (phagocytosis, attack, fusion) here 
 		#pragma omp parallel for 
@@ -280,6 +336,12 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			Cell* pC = (*all_cells)[i]; 
 			standard_cell_cell_interactions(pC,pC->phenotype,time_since_last_mechanics); 
 		}
+
+		end = omp_get_wtime();
+		time_standard_cell_interactions += (end - start);
+		parallel_time_in_this_call += (end - start);
+
+
 		// super-critical to performance! clear the "dummy" cells from phagocytosis / fusion
 		// otherwise, comptuational cost increases at polynomial rate VERY fast, as O(10,000) 
 		// dummy cells of size zero are left ot interact mechanically, etc. 
@@ -295,7 +357,7 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			cells_ready_to_die.clear();
 		}
 		
-
+		start = omp_get_wtime();
 		// update positions 
 		
 		#pragma omp parallel for 
@@ -305,6 +367,10 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			if( pC->is_out_of_domain == false && pC->is_movable)
 			{ pC->update_position(time_since_last_mechanics); }
 		}
+
+		end = omp_get_wtime();
+		time_update_positions += (end - start);
+		parallel_time_in_this_call += (end - start);
 		
 		// When somebody reviews this code, let's add proper braces for clarity!!! 
 		
@@ -314,6 +380,8 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 				(*all_cells)[i]->update_voxel_in_container();
 		last_mechanics_time=t;
 	}
+
+	total_parallel_time_in_update_all_cells += parallel_time_in_this_call;
 	
 	initialzed=true;
 	return;

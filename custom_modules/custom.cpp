@@ -66,9 +66,12 @@
 */
 
 #include "./custom.h"
+// #include <fstream>
 
 double total_dead_tumor_cells = 0.0;
 double previous_dead_tumor_cells = 0.0;
+
+double total_parallel_time_in_T_Cell_recruitment = 0.0;
 
 double get_dead_tumor_cells() {
     return total_dead_tumor_cells;
@@ -119,6 +122,11 @@ void update_T_cell_recruitment(double dt) {
 	int tumor_ID = get_cell_definition("tumor").type;
 	int num_tumor_cells = 0;
 
+	double parallel_time_in_this_call = 0.0; // tiempo solo de esta llamada
+    double start, end;
+	
+	start = omp_get_wtime();
+
 	#pragma omp parallel for reduction(+:num_tumor_cells)
 	for( int i=0; i < (*all_cells).size(); i++ )
 	{
@@ -129,6 +137,9 @@ void update_T_cell_recruitment(double dt) {
 		}
 	}
 
+	end = omp_get_wtime();
+	parallel_time_in_this_call += (end - start);
+
 	int new_M0_cells = int(num_tumor_cells * 0.05 / 24);
 	
 	recruit_cell("naive T cell", new_naive_T_cells, min_position_cells, max_position_cells);
@@ -136,6 +147,8 @@ void update_T_cell_recruitment(double dt) {
 
 	std::cout << std::endl << "Se agregaron " << new_naive_T_cells << " naive T cells y " << new_M0_cells << " M0 macrophages." << std::endl; 
 	std::cout << "Quedan " << num_tumor_cells << " tumor cells.\n" << std::endl; 
+
+	total_parallel_time_in_T_Cell_recruitment += parallel_time_in_this_call;
 }
 
 
@@ -342,3 +355,55 @@ void custom_function(Cell* pCell, Phenotype& phenotype, double dt)
 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt )
 { return; } 
+
+
+void print_parallel_timings()
+{
+	std::vector<std::pair<std::string, double>> timings = {
+		{"update_all_cells", total_parallel_time_in_update_all_cells},
+		{"time_secretion_uptake", time_secretion_uptake},
+		{"time_intracellular_update", time_intracellular_update},
+		{"time_bundled_phenotype_update", time_bundled_phenotype_update},
+		{"time_interactions", time_interactions},
+		{"time_custom_rules", time_custom_rules},
+		{"time_update_velocities", time_update_velocities},
+		{"time_dynamic_spring_attachments", time_dynamic_spring_attachments},
+		{"time_standard_cell_interactions", time_standard_cell_interactions},
+		{"time_update_positions", time_update_positions},
+		{"T_cell_recruitment", total_parallel_time_in_T_Cell_recruitment}
+	};
+
+	std::cout << "\n\n";
+	for (const auto& timing : timings)
+	{
+		std::cout << "[" << timing.first << "] Tiempo TOTAL (todas las llamadas): " 
+		          << timing.second << " segundos." << std::endl;
+	}
+}
+
+void save_parallel_timings_to_csv(std::string filename)
+{
+    std::ofstream file(filename);
+
+    if (!file.is_open())
+    {
+        std::cout << "Error: No se pudo abrir el archivo " << filename << " para escritura." << std::endl;
+        return;
+    }
+
+    file << "Seccion,Tiempo(segundos)\n"; // Cabecera del CSV
+
+    file << "update_all_cells_total," << total_parallel_time_in_update_all_cells << "\n";
+    file << "secretion_uptake," << time_secretion_uptake << "\n";
+    file << "intracellular_update," << time_intracellular_update << "\n";
+    file << "bundled_phenotype_update," << time_bundled_phenotype_update << "\n";
+    file << "interactions," << time_interactions << "\n";
+    file << "custom_rules," << time_custom_rules << "\n";
+    file << "update_velocities," << time_update_velocities << "\n";
+    file << "dynamic_spring_attachments," << time_dynamic_spring_attachments << "\n";
+    file << "standard_cell_interactions," << time_standard_cell_interactions << "\n";
+    file << "update_positions," << time_update_positions << "\n";
+
+    file.close();
+    std::cout << "Tiempos paralelos guardados en: " << filename << std::endl;
+}

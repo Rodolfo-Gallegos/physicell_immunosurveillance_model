@@ -53,10 +53,13 @@
 
 #include "BioFVM_basic_agent.h"
 
+double total_parallel_time_in_BioFVM = 0.0;
+
 namespace BioFVM{
 
 extern std::string BioFVM_version; 
 extern std::string BioFVM_URL; 
+
 
 Microenvironment* default_microenvironment = NULL; 
 
@@ -786,6 +789,12 @@ void Microenvironment::update_rates( void )
 	if( uptake_rates.size() != number_of_voxels() )
 	{ uptake_rates.assign( number_of_voxels() , zero ); }
 
+
+	double parallel_time_in_this_call = 0.0; // tiempo solo de esta llamada
+    double start, end;
+	
+	start = omp_get_wtime();
+
 	#pragma omp parallel for 
 	for( unsigned int i=0 ; i < number_of_voxels() ; i++ )
 	{
@@ -795,6 +804,12 @@ void Microenvironment::update_rates( void )
 		
 		supply_target_densities_times_supply_rates[i] *= supply_rates[i]; 
 	}
+
+	end = omp_get_wtime();
+	parallel_time_in_this_call += (end - start);
+
+	total_parallel_time_in_BioFVM += parallel_time_in_this_call;
+
 	return; 
 }
 
@@ -856,6 +871,11 @@ void Microenvironment::compute_all_gradient_vectors( void )
 		two_dz *= 2.0;
 		gradient_constants_defined = true; 
 	}
+
+	double parallel_time_in_this_call = 0.0; // tiempo solo de esta llamada
+    double start, end;
+	
+	start = omp_get_wtime();
 	
 	#pragma omp parallel for 
 	for( unsigned int k=0; k < mesh.z_coordinates.size() ; k++ )
@@ -902,6 +922,11 @@ void Microenvironment::compute_all_gradient_vectors( void )
 			
 		}
 	}
+
+	end = omp_get_wtime();
+	parallel_time_in_this_call += (end - start);
+
+	start = omp_get_wtime();
 	
 	#pragma omp parallel for 
 	for( unsigned int k=0; k < mesh.z_coordinates.size() ; k++ )
@@ -952,6 +977,11 @@ void Microenvironment::compute_all_gradient_vectors( void )
 	if( mesh.z_coordinates.size() == 1 )
 	{ return; }
 
+	end = omp_get_wtime();
+	parallel_time_in_this_call += (end - start);
+
+	start = omp_get_wtime();
+
 	#pragma omp parallel for 
 	for( unsigned int j=0; j < mesh.y_coordinates.size() ; j++ )
 	{
@@ -996,6 +1026,14 @@ void Microenvironment::compute_all_gradient_vectors( void )
 			
 		}
 	}
+
+	end = omp_get_wtime();
+	parallel_time_in_this_call += (end - start);
+
+	total_parallel_time_in_BioFVM += parallel_time_in_this_call;
+
+	// std::cout << "[BioFVM] Tiempo por llamada en regiones paralelas: " 
+	// << total_parallel_time_in_BioFVM << " segundos." << std::endl;
 
 	return; 
 }

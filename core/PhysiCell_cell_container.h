@@ -74,6 +74,18 @@
 #include "../BioFVM/BioFVM_mesh.h"
 #include "../BioFVM/BioFVM_microenvironment.h"
 
+extern double total_parallel_time_in_update_all_cells;
+extern double time_secretion_uptake;
+extern double time_intracellular_update;
+extern double time_bundled_phenotype_update;
+extern double time_interactions;
+extern double time_custom_rules;
+extern double time_update_velocities;
+extern double time_dynamic_spring_attachments;
+extern double time_standard_cell_interactions;
+extern double time_update_positions;
+
+
 namespace PhysiCell{
 
 class Cell; 
@@ -121,8 +133,6 @@ int find_escaping_face_index(Cell* agent);
 extern std::vector<Cell*> *all_cells; 
 
 Cell_Container* create_cell_container_for_microenvironment( BioFVM::Microenvironment& m , double mechanics_voxel_size );
-
-
 
 };
 #endif

@@ -261,5 +261,14 @@ int main( int argc, char* argv[] )
 	std::cout << std::endl << "Total simulation runtime: " << std::endl; 
 	BioFVM::display_stopwatch_value( std::cout , BioFVM::runtime_stopwatch_value() ); 
 
+	std::cout << "[update_all_cells] Tiempo TOTAL en regiones paralelas (todas las llamadas): " 
+          	<< total_parallel_time_in_update_all_cells << " segundos." << std::endl;
+
+	std::cout << "[T_cell_recruitment] Tiempo TOTAL en regiones paralelas (todas las llamadas): " 
+			<< total_parallel_time_in_T_Cell_recruitment << " segundos." << std::endl;
+
+	std::cout << "[BioFVM] Tiempo TOTAL en regiones paralelas (todas las llamadas): " 
+			<< total_parallel_time_in_BioFVM << " segundos." << std::endl;
+
 	return 0; 
 }

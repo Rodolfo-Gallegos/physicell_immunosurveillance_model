@@ -53,6 +53,9 @@
 #include "BioFVM_mesh.h"
 #include "BioFVM_agent_container.h"
 #include "BioFVM_MultiCellDS.h"
+#include <omp.h> 
+
+extern double total_parallel_time_in_BioFVM;
 
 namespace BioFVM{
 
