@@ -264,7 +264,7 @@ int main( int argc, char* argv[] )
 
 	print_parallel_timings();
 
-	save_parallel_timings_to_csv("parallel_timings.csv");
+	save_parallel_timings_to_csv(PhysiCell_settings.folder + "/parallel_timings.csv");
 
 	return 0; 
 }

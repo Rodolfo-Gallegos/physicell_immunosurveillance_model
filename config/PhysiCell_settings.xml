@@ -36,7 +36,7 @@
     </parallel>
 
     <save>
-        <folder>/home/rodolfo/Descargas/Tesis_Maestr&#237;a/grammar_samples-main/outputs/prueba</folder>
+        <folder>outputs/tiempos_icpx/rep_10</folder>
         <full_data>
             <interval units="min">7200</interval>
             <enable>false</enable>

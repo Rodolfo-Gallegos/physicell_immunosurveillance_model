@@ -359,27 +359,33 @@ void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& 
 
 void print_parallel_timings()
 {
-	std::vector<std::pair<std::string, double>> timings = {
-		{"update_all_cells", total_parallel_time_in_update_all_cells},
-		{"time_secretion_uptake", time_secretion_uptake},
-		{"time_intracellular_update", time_intracellular_update},
-		{"time_bundled_phenotype_update", time_bundled_phenotype_update},
-		{"time_interactions", time_interactions},
-		{"time_custom_rules", time_custom_rules},
-		{"time_update_velocities", time_update_velocities},
-		{"time_dynamic_spring_attachments", time_dynamic_spring_attachments},
-		{"time_standard_cell_interactions", time_standard_cell_interactions},
-		{"time_update_positions", time_update_positions},
-		{"T_cell_recruitment", total_parallel_time_in_T_Cell_recruitment}
-	};
+    std::vector<std::pair<std::string, double>> timings = {
+        {"update_all_cells", total_parallel_time_in_update_all_cells},
+        {"time_secretion_uptake", time_secretion_uptake},
+        {"time_intracellular_update", time_intracellular_update},
+        {"time_bundled_phenotype_update", time_bundled_phenotype_update},
+        {"time_interactions", time_interactions},
+        {"time_custom_rules", time_custom_rules},
+        {"time_update_velocities", time_update_velocities},
+        {"time_dynamic_spring_attachments", time_dynamic_spring_attachments},
+        {"time_standard_cell_interactions", time_standard_cell_interactions},
+        {"time_update_positions", time_update_positions}
+    };
 
-	std::cout << "\n\n";
-	for (const auto& timing : timings)
-	{
-		std::cout << "[" << timing.first << "] Tiempo TOTAL (todas las llamadas): " 
-		          << timing.second << " segundos." << std::endl;
-	}
+    double total = total_parallel_time_in_update_all_cells;
+
+    std::cout << "\n\n";
+    for (const auto& timing : timings)
+    {
+        double percentage = (total > 0.0) ? (timing.second / total * 100.0) : 0.0;
+        std::cout << "[" << timing.first << "] Tiempo TOTAL: " 
+                  << timing.second << " s (" << percentage << "%)" << std::endl;
+    }
+
+    std::cout << "[T_cell_recruitment] Tiempo TOTAL: " 
+              << total_parallel_time_in_T_Cell_recruitment << " s (NO cuenta en porcentaje)" << std::endl;
 }
+
 
 void save_parallel_timings_to_csv(std::string filename)
 {
@@ -391,18 +397,29 @@ void save_parallel_timings_to_csv(std::string filename)
         return;
     }
 
-    file << "Seccion,Tiempo(segundos)\n"; // Cabecera del CSV
+    file << "Seccion,Tiempo(segundos),Porcentaje(%)\n"; // Cabecera del CSV
 
-    file << "update_all_cells_total," << total_parallel_time_in_update_all_cells << "\n";
-    file << "secretion_uptake," << time_secretion_uptake << "\n";
-    file << "intracellular_update," << time_intracellular_update << "\n";
-    file << "bundled_phenotype_update," << time_bundled_phenotype_update << "\n";
-    file << "interactions," << time_interactions << "\n";
-    file << "custom_rules," << time_custom_rules << "\n";
-    file << "update_velocities," << time_update_velocities << "\n";
-    file << "dynamic_spring_attachments," << time_dynamic_spring_attachments << "\n";
-    file << "standard_cell_interactions," << time_standard_cell_interactions << "\n";
-    file << "update_positions," << time_update_positions << "\n";
+    double total = total_parallel_time_in_update_all_cells;
+
+    auto write_row = [&](std::string name, double value)
+    {
+        double percentage = (total > 0.0) ? (value / total * 100.0) : 0.0;
+        file << name << "," << value << "," << percentage << "\n";
+    };
+
+    write_row("update_all_cells_total", total_parallel_time_in_update_all_cells);
+    write_row("secretion_uptake", time_secretion_uptake);
+    write_row("intracellular_update", time_intracellular_update);
+    write_row("bundled_phenotype_update", time_bundled_phenotype_update);
+    write_row("interactions", time_interactions);
+    write_row("custom_rules", time_custom_rules);
+    write_row("update_velocities", time_update_velocities);
+    write_row("dynamic_spring_attachments", time_dynamic_spring_attachments);
+    write_row("standard_cell_interactions", time_standard_cell_interactions);
+    write_row("update_positions", time_update_positions);
+
+    // No entra en el porcentaje:
+    file << "T_cell_recruitment," << total_parallel_time_in_T_Cell_recruitment << ",0\n";
 
     file.close();
     std::cout << "Tiempos paralelos guardados en: " << filename << std::endl;

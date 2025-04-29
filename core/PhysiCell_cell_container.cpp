@@ -282,14 +282,14 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 		// Update velocities
 		start = omp_get_wtime();
 		
-		#pragma omp parallel for 
+		#pragma omp parallel for schedule(dynamic)
 		for( int i=0; i < (*all_cells).size(); i++ )
 		{
 			Cell* pC = (*all_cells)[i]; 
 			if( pC->functions.update_velocity && pC->is_out_of_domain == false && pC->is_movable )
 			{ pC->functions.update_velocity( pC,pC->phenotype,time_since_last_mechanics ); }
 		}
-
+		
 		end = omp_get_wtime();
 		time_update_velocities += (end - start);
 		parallel_time_in_this_call += (end - start);
