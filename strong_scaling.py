@@ -4,10 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Ruta base de las simulaciones
-base_path = "outputs/threads_2000"
+base_path = "outputs/threads_1000_poster_icpx"
 
 # Número de hilos que se probaron
-thread_values = [1, 2, 4, 8, 10, 12]
+thread_values = [1, 2, 4, 8]
 
 # Diccionario para almacenar los tiempos de ejecución
 execution_times = {threads: [] for threads in thread_values}
@@ -48,27 +48,41 @@ for threads in thread_values:
         std_times.append(None)
         print(f"\nThreads: {threads} - No data found")
 
-# Graficar comparación de tiempos de ejecución
+# Colors for line and error bars
+line_color = "#00BECC"     # wine 67001F
+error_color = "#67001F"    # blue 00BECC
+
 plt.figure(figsize=(8, 5))
-plt.errorbar(thread_values, avg_times, yerr=std_times, fmt='o-', capsize=5, 
-             color="#007acc", ecolor="#cc0000", elinewidth=2, capthick=2, markersize=8, lw=2, label="Execution Time")
 
-# Agregar anotaciones en los puntos
+# Line with markers and error bars
+plt.errorbar(thread_values, avg_times, yerr=std_times, fmt='o-', capsize=6, 
+             color=line_color, ecolor=error_color, elinewidth=2, capthick=1.5, 
+             markersize=9, lw=2.5, label="Execution time (avg ± std)")
+
+# Annotations above each point with adjusted x offset for specific cases
 for i, txt in enumerate(avg_times):
-    plt.annotate(f"{txt:.2f} s", (thread_values[i], avg_times[i]), textcoords="offset points", xytext=(0, 10),
-                 ha="center", fontsize=10, color="black", weight="bold")
+    x_offset = 35 if thread_values[i] in [1, 2, 4] else 0  # Shift right for 2 and 4 threads
+    plt.annotate(f"{txt:.2f} s", (thread_values[i], avg_times[i]),
+                 textcoords="offset points", xytext=(x_offset, 10),
+                 ha="center", fontsize=14, color="black", weight="semibold")
 
-# Mejoras en los ejes y el estilo general
-plt.xlabel("Number of Threads", fontsize=12, fontweight="bold")
-plt.ylabel("Execution Time (seconds)", fontsize=12, fontweight="bold")
-plt.title("Execution Time (2000 initial tumor cells) vs Number of Threads", fontsize=14, fontweight="bold")
-plt.xticks(thread_values, fontsize=11)
-plt.yticks(fontsize=11)
-plt.grid(True, linestyle="--", alpha=0.6)
-plt.legend(fontsize=11)
+# Labels and title
+plt.xlabel("Number of cores", fontsize=18, fontweight="bold")
+plt.ylabel("Execution time (seconds)", fontsize=18, fontweight="bold")
+plt.ylim(bottom=0)
+plt.title("Strong scaling\n(1000 initial tumor cells)", 
+          fontsize=18, fontweight="bold", pad=15)
+
+# Axis formatting
+plt.xticks(thread_values, fontsize=14)
+plt.yticks(fontsize=14)
+plt.grid(True, which='major', linestyle='--', alpha=0.5)
+plt.box(False)  # Clean style
+
+# Legend
+plt.legend(loc="upper right", fontsize=14, frameon=False)
+
+# Layout and export
 plt.tight_layout()
-
-# Guardar la imagen en alta calidad
-# plt.savefig("execution_time_vs_threads_2000.png", dpi=300)
-
-plt.show()  # Descomentar si quieres ver la gráfica
+# plt.savefig("execution_time_vs_threads_1000.png", dpi=300)
+plt.show()

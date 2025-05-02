@@ -26,7 +26,7 @@ for num_threads in thread_values:
 
     # Bucle de repeticiones
     for rep in range(1, num_replicates + 1):
-        new_folder = f"outputs/threads_1000/threads_{num_threads}_rep{rep}"
+        new_folder = f"outputs/threads_1000_poster_icpx/threads_{num_threads}_rep{rep}"
         
         if os.path.exists(new_folder):
             print(f"Skipping existing simulation: {new_folder}")

@@ -10,10 +10,10 @@
     </cell_rules>
 
     <domain>
-        <x_min>-750</x_min>
-        <x_max>750</x_max>
-        <y_min>-750</y_min>
-        <y_max>750</y_max>
+        <x_min>-550</x_min>
+        <x_max>550</x_max>
+        <y_min>-550</y_min>
+        <y_max>550</y_max>
         <z_min>-10</z_min>
         <z_max>10</z_max>
         <dx>20</dx>
@@ -23,7 +23,7 @@
     </domain>
 
     <overall>
-        <max_time units="min">7200</max_time>
+        <max_time units="min">7200.0</max_time>
         <time_units>min</time_units>
         <space_units>micron</space_units>
         <dt_diffusion units="min">0.01</dt_diffusion>
@@ -32,19 +32,19 @@
     </overall>
 
     <parallel>
-        <omp_num_threads>12</omp_num_threads>
+        <omp_num_threads>1</omp_num_threads>
     </parallel>
 
     <save>
-        <folder>outputs/threads_2000/threads_10_rep10</folder>
+        <folder>outputs/threads_1000_poster_icpx/threads_12_rep10</folder>
         <full_data>
-            <interval units="min">1440</interval>
-            <enable>true</enable>
+            <interval units="min">60</interval>
+            <enable>false</enable>
         </full_data>
         <SVG>
-            <interval units="min">1440</interval>
-            <enable>true</enable>
-            <plot_substrate enabled="true" limits="false">
+            <interval units="min">60</interval>
+            <enable>false</enable>
+            <plot_substrate enabled="false" limits="false">
                 <substrate>IFN-gamma</substrate>
                 <min_conc />
                 <max_conc />
@@ -66,7 +66,7 @@
         <variable name="debris" units="dimensionless" ID="0">
             <physical_parameter_set>
                 <diffusion_coefficient units="micron^2/min">1</diffusion_coefficient>
-                <decay_rate units="1/min">0.1</decay_rate>
+                <decay_rate units="1/min">0.0</decay_rate>
             </physical_parameter_set>
             <initial_condition units="mmHg">0.0</initial_condition>
             <Dirichlet_boundary_condition units="mmHg" enabled="False">0.0</Dirichlet_boundary_condition>
@@ -81,7 +81,7 @@
         </variable>
         <variable name="oxygen" units="dimensionless" ID="1">
             <physical_parameter_set>
-                <diffusion_coefficient units="micron^2/min">100000.0</diffusion_coefficient>
+                <diffusion_coefficient units="micron^2/min">50000.0</diffusion_coefficient>
                 <decay_rate units="1/min">0.1</decay_rate>
             </physical_parameter_set>
             <initial_condition units="mmHg">38.0</initial_condition>
@@ -131,6 +131,22 @@
             <physical_parameter_set>
                 <diffusion_coefficient units="micron^2/min">1000</diffusion_coefficient>
                 <decay_rate units="1/min">0.1</decay_rate>
+            </physical_parameter_set>
+            <initial_condition units="mmHg">0.0</initial_condition>
+            <Dirichlet_boundary_condition units="mmHg" enabled="False">0.0</Dirichlet_boundary_condition>
+            <Dirichlet_options>
+                <boundary_value ID="xmin" enabled="False">0.0</boundary_value>
+                <boundary_value ID="xmax" enabled="False">0.0</boundary_value>
+                <boundary_value ID="ymin" enabled="False">0.0</boundary_value>
+                <boundary_value ID="ymax" enabled="False">0.0</boundary_value>
+                <boundary_value ID="zmin" enabled="False">0.0</boundary_value>
+                <boundary_value ID="zmax" enabled="False">0.0</boundary_value>
+            </Dirichlet_options>
+        </variable>
+        <variable name="antigen" units="dimensionless" ID="5">
+            <physical_parameter_set>
+                <diffusion_coefficient units="micron^2/min">1</diffusion_coefficient>
+                <decay_rate units="1/min">0.0</decay_rate>
             </physical_parameter_set>
             <initial_condition units="mmHg">0.0</initial_condition>
             <Dirichlet_boundary_condition units="mmHg" enabled="False">0.0</Dirichlet_boundary_condition>
@@ -248,6 +264,7 @@
                                 <chemotactic_sensitivity substrate="IFN-gamma">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-10">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-4">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="antigen">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="substrate">0.0</chemotactic_sensitivity>
                             </chemotactic_sensitivities>
                         </advanced_chemotaxis>
@@ -255,7 +272,7 @@
                 </motility>
                 <secretion>
                     <substrate name="debris">
-                        <secretion_rate units="1/min">0.0001</secretion_rate>
+                        <secretion_rate units="1/min">0</secretion_rate>
                         <secretion_target units="substrate density">1</secretion_target>
                         <uptake_rate units="1/min">0.0</uptake_rate>
                         <net_export_rate units="total substrate/min">0.0</net_export_rate>
@@ -280,6 +297,12 @@
                     </substrate>
                     <substrate name="IL-4">
                         <secretion_rate units="1/min">10</secretion_rate>
+                        <secretion_target units="substrate density">1.0</secretion_target>
+                        <uptake_rate units="1/min">0.0</uptake_rate>
+                        <net_export_rate units="total substrate/min">0.0</net_export_rate>
+                    </substrate>
+                    <substrate name="antigen">
+                        <secretion_rate units="1/min">1</secretion_rate>
                         <secretion_target units="substrate density">1.0</secretion_target>
                         <uptake_rate units="1/min">0.0</uptake_rate>
                         <net_export_rate units="total substrate/min">0.0</net_export_rate>
@@ -420,19 +443,20 @@
                         <enabled>true</enabled>
                         <use_2D>true</use_2D>
                         <chemotaxis>
-                            <enabled>true</enabled>
+                            <enabled>false</enabled>
                             <substrate>debris</substrate>
                             <direction>1</direction>
                         </chemotaxis>
                         <advanced_chemotaxis>
-                            <enabled>false</enabled>
+                            <enabled>true</enabled>
                             <normalize_each_gradient>false</normalize_each_gradient>
                             <chemotactic_sensitivities>
-                                <chemotactic_sensitivity substrate="debris">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="debris">1.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="oxygen">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IFN-gamma">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-10">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-4">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="antigen">1.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="substrate">0.0</chemotactic_sensitivity>
                             </chemotactic_sensitivities>
                         </advanced_chemotaxis>
@@ -467,6 +491,12 @@
                         <secretion_rate units="1/min">0.0</secretion_rate>
                         <secretion_target units="substrate density">1.0</secretion_target>
                         <uptake_rate units="1/min">1.0</uptake_rate>
+                        <net_export_rate units="total substrate/min">0.0</net_export_rate>
+                    </substrate>
+                    <substrate name="antigen">
+                        <secretion_rate units="1/min">0.0</secretion_rate>
+                        <secretion_target units="substrate density">1.0</secretion_target>
+                        <uptake_rate units="1/min">0.0</uptake_rate>
                         <net_export_rate units="total substrate/min">0.0</net_export_rate>
                     </substrate>
                 </secretion>
@@ -605,19 +635,20 @@
                         <enabled>true</enabled>
                         <use_2D>true</use_2D>
                         <chemotaxis>
-                            <enabled>true</enabled>
+                            <enabled>false</enabled>
                             <substrate>debris</substrate>
                             <direction>1</direction>
                         </chemotaxis>
                         <advanced_chemotaxis>
-                            <enabled>false</enabled>
+                            <enabled>true</enabled>
                             <normalize_each_gradient>false</normalize_each_gradient>
                             <chemotactic_sensitivities>
-                                <chemotactic_sensitivity substrate="debris">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="debris">1.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="oxygen">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IFN-gamma">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-10">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-4">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="antigen">1.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="substrate">0.0</chemotactic_sensitivity>
                             </chemotactic_sensitivities>
                         </advanced_chemotaxis>
@@ -652,6 +683,12 @@
                         <secretion_rate units="1/min">0.0</secretion_rate>
                         <secretion_target units="substrate density">1.0</secretion_target>
                         <uptake_rate units="1/min">1.0</uptake_rate>
+                        <net_export_rate units="total substrate/min">0.0</net_export_rate>
+                    </substrate>
+                    <substrate name="antigen">
+                        <secretion_rate units="1/min">0.0</secretion_rate>
+                        <secretion_target units="substrate density">1.0</secretion_target>
+                        <uptake_rate units="1/min">0.0</uptake_rate>
                         <net_export_rate units="total substrate/min">0.0</net_export_rate>
                     </substrate>
                 </secretion>
@@ -790,19 +827,20 @@
                         <enabled>true</enabled>
                         <use_2D>true</use_2D>
                         <chemotaxis>
-                            <enabled>true</enabled>
+                            <enabled>false</enabled>
                             <substrate>debris</substrate>
                             <direction>1</direction>
                         </chemotaxis>
                         <advanced_chemotaxis>
-                            <enabled>false</enabled>
+                            <enabled>true</enabled>
                             <normalize_each_gradient>false</normalize_each_gradient>
                             <chemotactic_sensitivities>
-                                <chemotactic_sensitivity substrate="debris">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="debris">1.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="oxygen">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IFN-gamma">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-10">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-4">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="antigen">1.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="substrate">0.0</chemotactic_sensitivity>
                             </chemotactic_sensitivities>
                         </advanced_chemotaxis>
@@ -837,6 +875,12 @@
                         <secretion_rate units="1/min">10</secretion_rate>
                         <secretion_target units="substrate density">1.0</secretion_target>
                         <uptake_rate units="1/min">1.0</uptake_rate>
+                        <net_export_rate units="total substrate/min">0.0</net_export_rate>
+                    </substrate>
+                    <substrate name="antigen">
+                        <secretion_rate units="1/min">0.0</secretion_rate>
+                        <secretion_target units="substrate density">1.0</secretion_target>
+                        <uptake_rate units="1/min">0.0</uptake_rate>
                         <net_export_rate units="total substrate/min">0.0</net_export_rate>
                     </substrate>
                 </secretion>
@@ -976,18 +1020,19 @@
                         <use_2D>true</use_2D>
                         <chemotaxis>
                             <enabled>true</enabled>
-                            <substrate>IFN-gamma</substrate>
+                            <substrate>debris</substrate>
                             <direction>1</direction>
                         </chemotaxis>
                         <advanced_chemotaxis>
                             <enabled>false</enabled>
                             <normalize_each_gradient>false</normalize_each_gradient>
                             <chemotactic_sensitivities>
-                                <chemotactic_sensitivity substrate="debris">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="debris">1.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="oxygen">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IFN-gamma">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-10">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-4">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="antigen">1</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="substrate">0.0</chemotactic_sensitivity>
                             </chemotactic_sensitivities>
                         </advanced_chemotaxis>
@@ -1019,6 +1064,12 @@
                         <net_export_rate units="total substrate/min">0.0</net_export_rate>
                     </substrate>
                     <substrate name="IL-4">
+                        <secretion_rate units="1/min">0.0</secretion_rate>
+                        <secretion_target units="substrate density">1.0</secretion_target>
+                        <uptake_rate units="1/min">0.0</uptake_rate>
+                        <net_export_rate units="total substrate/min">0.0</net_export_rate>
+                    </substrate>
+                    <substrate name="antigen">
                         <secretion_rate units="1/min">0.0</secretion_rate>
                         <secretion_target units="substrate density">1.0</secretion_target>
                         <uptake_rate units="1/min">0.0</uptake_rate>
@@ -1161,18 +1212,19 @@
                         <use_2D>true</use_2D>
                         <chemotaxis>
                             <enabled>true</enabled>
-                            <substrate>debris</substrate>
+                            <substrate>antigen</substrate>
                             <direction>1</direction>
                         </chemotaxis>
                         <advanced_chemotaxis>
                             <enabled>false</enabled>
                             <normalize_each_gradient>false</normalize_each_gradient>
                             <chemotactic_sensitivities>
-                                <chemotactic_sensitivity substrate="debris">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="debris">1.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="oxygen">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IFN-gamma">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-10">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-4">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="antigen">0.1</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="substrate">0.0</chemotactic_sensitivity>
                             </chemotactic_sensitivities>
                         </advanced_chemotaxis>
@@ -1192,7 +1244,7 @@
                         <net_export_rate units="total substrate/min">0</net_export_rate>
                     </substrate>
                     <substrate name="IFN-gamma">
-                        <secretion_rate units="1/min">10</secretion_rate>
+                        <secretion_rate units="1/min">5</secretion_rate>
                         <secretion_target units="substrate density">1</secretion_target>
                         <uptake_rate units="1/min">1</uptake_rate>
                         <net_export_rate units="total substrate/min">0.0</net_export_rate>
@@ -1204,6 +1256,12 @@
                         <net_export_rate units="total substrate/min">0.0</net_export_rate>
                     </substrate>
                     <substrate name="IL-4">
+                        <secretion_rate units="1/min">0.0</secretion_rate>
+                        <secretion_target units="substrate density">1.0</secretion_target>
+                        <uptake_rate units="1/min">0.0</uptake_rate>
+                        <net_export_rate units="total substrate/min">0.0</net_export_rate>
+                    </substrate>
+                    <substrate name="antigen">
                         <secretion_rate units="1/min">0.0</secretion_rate>
                         <secretion_target units="substrate density">1.0</secretion_target>
                         <uptake_rate units="1/min">0.0</uptake_rate>
@@ -1270,7 +1328,7 @@
             <phenotype>
                 <cycle code="5" name="live">
                     <phase_transition_rates units="1/min">
-                        <rate start_index="0" end_index="0" fixed_duration="false">0</rate>
+                        <rate start_index="0" end_index="0" fixed_duration="false">7.2e-5</rate>
                     </phase_transition_rates>
                 </cycle>
                 <death>
@@ -1358,6 +1416,7 @@
                                 <chemotactic_sensitivity substrate="IFN-gamma">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-10">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="IL-4">0.0</chemotactic_sensitivity>
+                                <chemotactic_sensitivity substrate="antigen">0.0</chemotactic_sensitivity>
                                 <chemotactic_sensitivity substrate="substrate">0.0</chemotactic_sensitivity>
                             </chemotactic_sensitivities>
                         </advanced_chemotaxis>
@@ -1389,6 +1448,12 @@
                         <net_export_rate units="total substrate/min">0.0</net_export_rate>
                     </substrate>
                     <substrate name="IL-4">
+                        <secretion_rate units="1/min">0.0</secretion_rate>
+                        <secretion_target units="substrate density">1.0</secretion_target>
+                        <uptake_rate units="1/min">0.0</uptake_rate>
+                        <net_export_rate units="total substrate/min">0.0</net_export_rate>
+                    </substrate>
+                    <substrate name="antigen">
                         <secretion_rate units="1/min">0.0</secretion_rate>
                         <secretion_target units="substrate density">1.0</secretion_target>
                         <uptake_rate units="1/min">0.0</uptake_rate>
@@ -1461,12 +1526,12 @@
     </initial_conditions>
 
     <user_parameters>
-        <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">400</number_of_cells>
-        <min_position_cells type="double" units="microns" description="Minimum recruitment radius for T cells">450</min_position_cells>
-        <max_position_cells type="double" units="microns" description="Maximum recruitment radius for T cells">500</max_position_cells>
-        <number_of_tumor type="int" units="none" description="Initial number of tumor cells">2000</number_of_tumor>
+        <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">100</number_of_cells>
+        <min_position_cells type="double" units="microns" description="Minimum recruitment radius for T cells">250</min_position_cells>
+        <max_position_cells type="double" units="microns" description="Maximum recruitment radius for T cells">300</max_position_cells>
+        <number_of_tumor type="int" units="none" description="Initial number of tumor cells">500</number_of_tumor>
         <min_position_tumor type="double" units="microns" description="Minimum tumor radius">0.0</min_position_tumor>
-        <max_position_tumor type="double" units="microns" description="Maximum tumor radius">372</max_position_tumor>
+        <max_position_tumor type="double" units="microns" description="Maximum tumor radius">200</max_position_tumor>
         <number_of_M1_macrophage type="int" units="none" description="Initial number of M1 macrophages">0</number_of_M1_macrophage>
         <number_of_M2_macrophage type="int" units="none" description="Initial number of M2 macrophages">0</number_of_M2_macrophage>
         <number_of_CD8_T_cell type="int" units="none" description="Initial number of CD8+ T cells">0</number_of_CD8_T_cell>

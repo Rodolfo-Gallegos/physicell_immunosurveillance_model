@@ -17,7 +17,7 @@ def modify_output_folder(new_folder):
 
 # Bucle de repeticiones
 for rep in range(1, num_replicates + 1):
-    new_folder = f"outputs/tiempos_icpx/rep_{rep}"
+    new_folder = f"outputs/weak/4c_2000tc/rep_{rep}"
     
     if os.path.exists(new_folder):
         print(f"Skipping existing simulation: {new_folder}")
