@@ -10,10 +10,10 @@
     </cell_rules>
 
     <domain>
-        <x_min>-750</x_min>
-        <x_max>750</x_max>
-        <y_min>-750</y_min>
-        <y_max>750</y_max>
+        <x_min>-650</x_min>
+        <x_max>650</x_max>
+        <y_min>-650</y_min>
+        <y_max>650</y_max>
         <z_min>-10</z_min>
         <z_max>10</z_max>
         <dx>20</dx>
@@ -32,19 +32,19 @@
     </overall>
 
     <parallel>
-        <omp_num_threads>4</omp_num_threads>
+        <omp_num_threads>1</omp_num_threads>
     </parallel>
 
     <save>
-        <folder>outputs/weak/4c_2000tc/rep_10</folder>
+        <folder>outputs/Prueba_nvcc/</folder>
         <full_data>
-            <interval units="min">7200</interval>
-            <enable>false</enable>
+            <interval units="min">60</interval>
+            <enable>true</enable>
         </full_data>
         <SVG>
-            <interval units="min">7200</interval>
-            <enable>false</enable>
-            <plot_substrate enabled="false" limits="false">
+            <interval units="min">60</interval>
+            <enable>true</enable>
+            <plot_substrate enabled="true" limits="false">
                 <substrate>IFN-gamma</substrate>
                 <min_conc />
                 <max_conc />
@@ -81,7 +81,7 @@
         </variable>
         <variable name="oxygen" units="dimensionless" ID="1">
             <physical_parameter_set>
-                <diffusion_coefficient units="micron^2/min">200000.0</diffusion_coefficient>
+                <diffusion_coefficient units="micron^2/min">100000.0</diffusion_coefficient>
                 <decay_rate units="1/min">0.1</decay_rate>
             </physical_parameter_set>
             <initial_condition units="mmHg">38.0</initial_condition>
@@ -1526,12 +1526,12 @@
     </initial_conditions>
 
     <user_parameters>
-        <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">400</number_of_cells>
-        <min_position_cells type="double" units="microns" description="Minimum recruitment radius for T cells">450</min_position_cells>
-        <max_position_cells type="double" units="microns" description="Maximum recruitment radius for T cells">500</max_position_cells>
-        <number_of_tumor type="int" units="none" description="Initial number of tumor cells">2000</number_of_tumor>
+        <number_of_cells type="int" units="none" description="initial number of cells (for each cell type)">200</number_of_cells>
+        <min_position_cells type="double" units="microns" description="Minimum recruitment radius for T cells">350</min_position_cells>
+        <max_position_cells type="double" units="microns" description="Maximum recruitment radius for T cells">400</max_position_cells>
+        <number_of_tumor type="int" units="none" description="Initial number of tumor cells">1000</number_of_tumor>
         <min_position_tumor type="double" units="microns" description="Minimum tumor radius">0.0</min_position_tumor>
-        <max_position_tumor type="double" units="microns" description="Maximum tumor radius">400</max_position_tumor>
+        <max_position_tumor type="double" units="microns" description="Maximum tumor radius">300</max_position_tumor>
         <number_of_M1_macrophage type="int" units="none" description="Initial number of M1 macrophages">0</number_of_M1_macrophage>
         <number_of_M2_macrophage type="int" units="none" description="Initial number of M2 macrophages">0</number_of_M2_macrophage>
         <number_of_CD8_T_cell type="int" units="none" description="Initial number of CD8+ T cells">0</number_of_CD8_T_cell>

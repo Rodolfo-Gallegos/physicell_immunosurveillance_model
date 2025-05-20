@@ -36,7 +36,7 @@
     </parallel>
 
     <save>
-        <folder>outputs/weak/4c_2000tc/rep_10</folder>
+        <folder>outputs/perf/4000tc</folder>
         <full_data>
             <interval units="min">7200</interval>
             <enable>false</enable>

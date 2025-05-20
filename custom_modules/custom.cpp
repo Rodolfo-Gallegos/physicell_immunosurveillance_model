@@ -121,20 +121,32 @@ void update_T_cell_recruitment(double dt) {
 
 	int tumor_ID = get_cell_definition("tumor").type;
 	int num_tumor_cells = 0;
+	int live_tumor_cells = 0;
 
 	double parallel_time_in_this_call = 0.0; // tiempo solo de esta llamada
     double start, end;
 	
 	start = omp_get_wtime();
 
-	#pragma omp parallel for reduction(+:num_tumor_cells)
+	#pragma omp parallel for reduction(+:num_tumor_cells, live_tumor_cells)
 	for( int i=0; i < (*all_cells).size(); i++ )
 	{
 		Cell* pC = (*all_cells)[i]; 
 
-		if (pC->phenotype.death.dead == false && pC->type == tumor_ID) {
+		// if (pC->phenotype.death.dead == false && pC->type == tumor_ID) {
+		// 	num_tumor_cells++;
+		// }
+
+		if( pC->type == tumor_ID )
+		{
 			num_tumor_cells++;
+
+			if( pC->phenotype.death.dead == false )
+			{
+				live_tumor_cells++;
+			}
 		}
+
 	}
 
 	end = omp_get_wtime();
@@ -146,7 +158,8 @@ void update_T_cell_recruitment(double dt) {
 	recruit_cell("M0 macrophage", new_M0_cells, min_position_cells, max_position_cells);
 
 	std::cout << std::endl << "Se agregaron " << new_naive_T_cells << " naive T cells y " << new_M0_cells << " M0 macrophages." << std::endl; 
-	std::cout << "Quedan " << num_tumor_cells << " tumor cells.\n" << std::endl; 
+	std::cout << "Quedan " << num_tumor_cells << " tumor cells totales." << std::endl; 
+	std::cout << "Quedan " << live_tumor_cells << " tumor cells vivas.\n" << std::endl; 
 
 	total_parallel_time_in_T_Cell_recruitment += parallel_time_in_this_call;
 }
