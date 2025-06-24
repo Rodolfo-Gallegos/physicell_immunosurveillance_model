@@ -53,7 +53,12 @@
 
 #include "BioFVM_basic_agent.h"
 
-double total_parallel_time_in_BioFVM = 0.0;
+double total_parallel_time_in_BioFVM_microenvironment = 0.0;
+double time_bulk_sources_and_sinks = 0.0;
+double time_cell_sources_and_sinks = 0.0;
+double time_update_rates = 0.0;
+double time_compute_all_gradient_vectors = 0.0;
+
 
 namespace BioFVM{
 
@@ -741,6 +746,9 @@ void Microenvironment::simulate_bulk_sources_and_sinks( double dt )
 		
 		bulk_source_sink_solver_setup_done = true; 
 	}
+
+    double start, end;
+	start = omp_get_wtime();
 	
 	#pragma omp parallel for
 	for( unsigned int i=0; i < mesh.voxels.size() ; i++ )
@@ -759,16 +767,27 @@ void Microenvironment::simulate_bulk_sources_and_sinks( double dt )
 		(*p_density_vectors)[i] /= bulk_source_sink_solver_temp3[i];
 	}
 	
+	end = omp_get_wtime();
+	time_bulk_sources_and_sinks += (end - start);
+	total_parallel_time_in_BioFVM_microenvironment += (end - start);
+
 	return; 
 }
 
 void Microenvironment::simulate_cell_sources_and_sinks( std::vector<Basic_Agent*>& basic_agent_list , double dt )
 {
+    double start, end;
+	start = omp_get_wtime();
+
 	#pragma omp parallel for
 	for( unsigned int i=0 ; i < basic_agent_list.size() ; i++ )
 	{		
 		basic_agent_list[i]->simulate_secretion_and_uptake( this , dt ); 
 	}
+
+	end = omp_get_wtime();
+	time_cell_sources_and_sinks += (end - start);
+	total_parallel_time_in_BioFVM_microenvironment += (end - start);
 	
 	return; 
 }
@@ -790,9 +809,7 @@ void Microenvironment::update_rates( void )
 	{ uptake_rates.assign( number_of_voxels() , zero ); }
 
 
-	double parallel_time_in_this_call = 0.0; // tiempo solo de esta llamada
     double start, end;
-	
 	start = omp_get_wtime();
 
 	#pragma omp parallel for 
@@ -806,9 +823,8 @@ void Microenvironment::update_rates( void )
 	}
 
 	end = omp_get_wtime();
-	parallel_time_in_this_call += (end - start);
-
-	total_parallel_time_in_BioFVM += parallel_time_in_this_call;
+	time_update_rates += (end - start);
+	total_parallel_time_in_BioFVM_microenvironment += (end - start);
 
 	return; 
 }
@@ -872,9 +888,7 @@ void Microenvironment::compute_all_gradient_vectors( void )
 		gradient_constants_defined = true; 
 	}
 
-	double parallel_time_in_this_call = 0.0; // tiempo solo de esta llamada
     double start, end;
-	
 	start = omp_get_wtime();
 	
 	#pragma omp parallel for 
@@ -923,11 +937,7 @@ void Microenvironment::compute_all_gradient_vectors( void )
 		}
 	}
 
-	end = omp_get_wtime();
-	parallel_time_in_this_call += (end - start);
 
-	start = omp_get_wtime();
-	
 	#pragma omp parallel for 
 	for( unsigned int k=0; k < mesh.z_coordinates.size() ; k++ )
 	{
@@ -977,10 +987,6 @@ void Microenvironment::compute_all_gradient_vectors( void )
 	if( mesh.z_coordinates.size() == 1 )
 	{ return; }
 
-	end = omp_get_wtime();
-	parallel_time_in_this_call += (end - start);
-
-	start = omp_get_wtime();
 
 	#pragma omp parallel for 
 	for( unsigned int j=0; j < mesh.y_coordinates.size() ; j++ )
@@ -1028,12 +1034,8 @@ void Microenvironment::compute_all_gradient_vectors( void )
 	}
 
 	end = omp_get_wtime();
-	parallel_time_in_this_call += (end - start);
-
-	total_parallel_time_in_BioFVM += parallel_time_in_this_call;
-
-	// std::cout << "[BioFVM] Tiempo por llamada en regiones paralelas: " 
-	// << total_parallel_time_in_BioFVM << " segundos." << std::endl;
+	time_compute_all_gradient_vectors += (end - start);
+	total_parallel_time_in_BioFVM_microenvironment += (end - start);
 
 	return; 
 }

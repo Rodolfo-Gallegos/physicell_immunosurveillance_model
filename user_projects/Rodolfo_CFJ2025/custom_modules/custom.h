@@ -73,6 +73,8 @@ using namespace PhysiCell;
 
 extern double total_dead_tumor_cells;
 extern double previous_dead_tumor_cells;
+extern double total_parallel_time_in_T_Cell_recruitment;
+
 // setup functions to help us along 
 
 void create_cell_types( void );
@@ -94,4 +96,6 @@ void custom_function( Cell* pCell, Phenotype& phenotype , double dt );
 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt ); 
 
-extern double total_parallel_time_in_T_Cell_recruitment;
+void print_parallel_timings();
+
+void save_parallel_timings_to_csv(std::string filename);

@@ -86,6 +86,7 @@ double time_update_velocities = 0.0;
 double time_dynamic_spring_attachments = 0.0;
 double time_standard_cell_interactions = 0.0;
 double time_update_positions = 0.0;
+double time_standard_elastic_contact_function = 0.0;
 
 namespace PhysiCell{
 
@@ -307,6 +308,13 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 				Cell* pC = (*all_cells)[i]; 
 				dynamic_spring_attachments(pC,pC->phenotype,time_since_last_mechanics); 
 			}		
+
+			end = omp_get_wtime();
+			time_dynamic_spring_attachments += (end - start);
+			parallel_time_in_this_call += (end - start);
+
+			start = omp_get_wtime();
+			
 			#pragma omp parallel for 
 			for( int i=0; i < (*all_cells).size(); i++ )
 			{
@@ -323,7 +331,7 @@ void Cell_Container::update_all_cells(double t, double phenotype_dt_ , double me
 			}	
 
 			end = omp_get_wtime();
-			time_dynamic_spring_attachments += (end - start);
+			time_standard_elastic_contact_function += (end - start);
 			parallel_time_in_this_call += (end - start);
 		}
 

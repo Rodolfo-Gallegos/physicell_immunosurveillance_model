@@ -55,7 +55,11 @@
 #include "BioFVM_MultiCellDS.h"
 #include <omp.h> 
 
-extern double total_parallel_time_in_BioFVM;
+extern double total_parallel_time_in_BioFVM_microenvironment;
+extern double time_bulk_sources_and_sinks;
+extern double time_cell_sources_and_sinks;
+extern double time_update_rates;
+extern double time_compute_all_gradient_vectors;
 
 namespace BioFVM{
 

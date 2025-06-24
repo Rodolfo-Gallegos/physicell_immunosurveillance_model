@@ -74,6 +74,7 @@
 #include <fstream>
 
 #include "./core/PhysiCell.h"
+#include "./BioFVM/BioFVM.h"
 #include "./modules/PhysiCell_standard_modules.h" 
 
 // put custom code modules here! 
@@ -261,14 +262,9 @@ int main( int argc, char* argv[] )
 	std::cout << std::endl << "Total simulation runtime: " << std::endl; 
 	BioFVM::display_stopwatch_value( std::cout , BioFVM::runtime_stopwatch_value() ); 
 
-	std::cout << "[update_all_cells] Tiempo TOTAL en regiones paralelas (todas las llamadas): " 
-          	<< total_parallel_time_in_update_all_cells << " segundos." << std::endl;
+	print_parallel_timings();
 
-	std::cout << "[T_cell_recruitment] Tiempo TOTAL en regiones paralelas (todas las llamadas): " 
-			<< total_parallel_time_in_T_Cell_recruitment << " segundos." << std::endl;
-
-	std::cout << "[BioFVM] Tiempo TOTAL en regiones paralelas (todas las llamadas): " 
-			<< total_parallel_time_in_BioFVM << " segundos." << std::endl;
+	save_parallel_timings_to_csv(PhysiCell_settings.folder + "/parallel_timings.csv");
 
 	return 0; 
 }

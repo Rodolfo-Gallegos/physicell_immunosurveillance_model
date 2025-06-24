@@ -51,6 +51,16 @@
 
 #include "BioFVM_microenvironment.h" 
 
+extern double total_parallel_time_in_BioFVM_solvers;
+extern double time_LOD_3D_x;
+extern double time_LOD_3D_y;
+extern double time_LOD_3D_z;
+extern double time_LOD_2D_x;
+extern double time_LOD_2D_y;
+extern double time_LOD_1D;
+extern double time_explicit_uniform_rates;
+
+
 namespace BioFVM{
 // /*! diffusion-decay solvers for the equation du/dt = D*Laplacian(u) - lambda*u - U(x)*u + M(X)*(uT-u) */ 
 

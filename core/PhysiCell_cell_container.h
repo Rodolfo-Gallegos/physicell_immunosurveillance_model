@@ -84,6 +84,7 @@ extern double time_update_velocities;
 extern double time_dynamic_spring_attachments;
 extern double time_standard_cell_interactions;
 extern double time_update_positions;
+extern double time_standard_elastic_contact_function;
 
 
 namespace PhysiCell{

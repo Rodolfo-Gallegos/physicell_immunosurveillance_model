@@ -370,7 +370,7 @@ void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& 
 { return; } 
 
 
-void print_parallel_timings()
+void print_parallel_timings(double total_time)
 {
     std::vector<std::pair<std::string, double>> timings = {
         {"update_all_cells", total_parallel_time_in_update_all_cells},
@@ -381,22 +381,35 @@ void print_parallel_timings()
         {"time_custom_rules", time_custom_rules},
         {"time_update_velocities", time_update_velocities},
         {"time_dynamic_spring_attachments", time_dynamic_spring_attachments},
+		{"time_standard_elastic_contact_function", time_standard_elastic_contact_function},
         {"time_standard_cell_interactions", time_standard_cell_interactions},
-        {"time_update_positions", time_update_positions}
+        {"time_update_positions", time_update_positions},
     };
 
     double total = total_parallel_time_in_update_all_cells;
 
     std::cout << "\n\n";
-    for (const auto& timing : timings)
-    {
-        double percentage = (total > 0.0) ? (timing.second / total * 100.0) : 0.0;
-        std::cout << "[" << timing.first << "] Tiempo TOTAL: " 
-                  << timing.second << " s (" << percentage << "%)" << std::endl;
-    }
+    // for (const auto& timing : timings)
+    // {
+    //     double percentage = (total > 0.0) ? (timing.second / total * 100.0) : 0.0;
+    //     std::cout << "[" << timing.first << "] Tiempo TOTAL: " 
+    //               << timing.second << " s (" << percentage << "%)" << std::endl;
+    // }
 
-    std::cout << "[T_cell_recruitment] Tiempo TOTAL: " 
-              << total_parallel_time_in_T_Cell_recruitment << " s (NO cuenta en porcentaje)" << std::endl;
+    std::cout << "\n[T_cell_recruitment] Tiempo TOTAL: " 
+              << total_parallel_time_in_T_Cell_recruitment << " s \t" << total_parallel_time_in_T_Cell_recruitment * 100.0 / total_time << "%)" << std::endl;
+
+	std::cout << "\n[Update_all_cells] Tiempo TOTAL: " 
+			  << total_parallel_time_in_update_all_cells << " s \t" << total_parallel_time_in_update_all_cells * 100.0 / total_time << "%)" << std::endl;
+
+	// std::cout << "\n[BioFVM_microenvironment] Tiempo TOTAL: " 
+    //           << total_parallel_time_in_BioFVM_microenvironment << " s" << std::endl;
+
+	std::cout << "\n[BioFVM_solvers] Tiempo TOTAL: " 
+			  << total_parallel_time_in_BioFVM_solvers << " s \t" << total_parallel_time_in_BioFVM_solvers * 100.0 / total_time << "%)" << "%)" << std::endl;
+
+	std::cout << "Time for LOD_2D_x: " << time_LOD_2D_x << std::endl;
+	std::cout << "Time for LOD_2D_y: " << time_LOD_2D_y << std::endl;
 }
 
 
@@ -428,11 +441,14 @@ void save_parallel_timings_to_csv(std::string filename)
     write_row("custom_rules", time_custom_rules);
     write_row("update_velocities", time_update_velocities);
     write_row("dynamic_spring_attachments", time_dynamic_spring_attachments);
+	write_row("standard_elastic_contact_function", time_standard_elastic_contact_function);
     write_row("standard_cell_interactions", time_standard_cell_interactions);
     write_row("update_positions", time_update_positions);
 
     // No entra en el porcentaje:
     file << "T_cell_recruitment," << total_parallel_time_in_T_Cell_recruitment << ",0\n";
+	file << "BioFVM_microenvironment," << total_parallel_time_in_BioFVM_microenvironment << ",0\n";
+	file << "BioFVM_solvers," << total_parallel_time_in_BioFVM_solvers << ",0\n";
 
     file.close();
     std::cout << "Tiempos paralelos guardados en: " << filename << std::endl;

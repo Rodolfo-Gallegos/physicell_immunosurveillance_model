@@ -96,6 +96,6 @@ void custom_function( Cell* pCell, Phenotype& phenotype , double dt );
 
 void contact_function( Cell* pMe, Phenotype& phenoMe , Cell* pOther, Phenotype& phenoOther , double dt ); 
 
-void print_parallel_timings();
+void print_parallel_timings(double total_time);
 
 void save_parallel_timings_to_csv(std::string filename);

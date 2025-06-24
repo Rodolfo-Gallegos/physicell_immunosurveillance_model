@@ -1,7 +1,9 @@
 VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
 PROGRAM_NAME := project
 
-CC := g++
+# CC := icpx
+CC := nvcc
+
 # CC := g++-mp-7 # typical macports compiler name
 # CC := g++-7 # typical homebrew compiler name 
 
@@ -34,7 +36,14 @@ ARCH := native # best auto-tuning
 # ARCH := nocona #64-bit pentium 4 or later 
 
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
-CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+# CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+
+# CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -qopenmp -m64 -std=c++11
+
+# NVCC flags
+CFLAGS := -O2 -g -lineinfo -Xcompiler "-march=native -fopenmp -m64 -fno-omit-frame-pointer" -std=c++11
+# CFLAGS := -O2 -g -fno-omit-frame-pointer -fopenmp -march=native -m64 -std=c++11
+
 
 # CFLAGS := -march=$(ARCH) -O3 -fopenmp -m64 -std=c++11 -g
 

@@ -174,6 +174,8 @@ int main( int argc, char* argv[] )
 	}
 	
 	// main loop 
+
+	double start = omp_get_wtime();
 	
 	try 
 	{		
@@ -221,13 +223,14 @@ int main( int argc, char* argv[] )
 			/*
 			  Custom add-ons could potentially go here. 
 			*/
+
 			
-			static int day_duration = 24 * 60 * 100;
+			static int day_duration = 6000;
 			static int global_cycle_counter = 0;
 			
 			global_cycle_counter++;
 
-			if (global_cycle_counter >= day_duration / 24)
+			if (global_cycle_counter >= day_duration)
 			{
 				update_T_cell_recruitment(PhysiCell_globals.current_time); 
 				previous_dead_tumor_cells = total_dead_tumor_cells;
@@ -248,6 +251,10 @@ int main( int argc, char* argv[] )
 	{ // reference to the base of a polymorphic object
 		std::cout << e.what(); // information from length_error printed
 	}
+
+	double end = omp_get_wtime();
+	double total_time = end - start;
+	std::cout << "Simulation took " << total_time << " seconds \t (100%)" << std::endl;
 	
 	// save a final simulation snapshot 
 	
@@ -262,9 +269,9 @@ int main( int argc, char* argv[] )
 	std::cout << std::endl << "Total simulation runtime: " << std::endl; 
 	BioFVM::display_stopwatch_value( std::cout , BioFVM::runtime_stopwatch_value() ); 
 
-	print_parallel_timings();
+	print_parallel_timings(total_time);
 
-	save_parallel_timings_to_csv(PhysiCell_settings.folder + "/parallel_timings.csv");
+	save_parallel_timings_to_csv(PhysiCell_settings.folder + "parallel_timings.csv");
 
 	return 0; 
 }

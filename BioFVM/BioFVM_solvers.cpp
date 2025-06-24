@@ -52,6 +52,15 @@
 #include <iostream>
 #include <omp.h>
 
+double total_parallel_time_in_BioFVM_solvers = 0.0;
+double time_LOD_3D_x = 0.0;
+double time_LOD_3D_y = 0.0;
+double time_LOD_3D_z = 0.0;
+double time_LOD_2D_x = 0.0;
+double time_LOD_2D_y = 0.0;
+double time_LOD_1D = 0.0;
+double time_explicit_uniform_rates = 0.0;
+
 namespace BioFVM{
 
 // do I even need this? 
@@ -194,6 +203,10 @@ void diffusion_decay_solver__constant_coefficients_LOD_3D( Microenvironment& M, 
 	// x-diffusion 
 	
 	M.apply_dirichlet_conditions();
+
+	double start, end;
+	start = omp_get_wtime();
+
 	#pragma omp parallel for 
 	for( unsigned int k=0; k < M.mesh.z_coordinates.size() ; k++ )
 	{
@@ -221,75 +234,93 @@ void diffusion_decay_solver__constant_coefficients_LOD_3D( Microenvironment& M, 
 		}
 	}
 
+	end = omp_get_wtime();
+	time_LOD_3D_x += (end - start);
+	total_parallel_time_in_BioFVM_solvers += (end - start);
+
 	// y-diffusion 
 
 	M.apply_dirichlet_conditions();
+
+	start = omp_get_wtime();
+
 	#pragma omp parallel for 
 	for( unsigned int k=0; k < M.mesh.z_coordinates.size() ; k++ )
 	{
 		for( unsigned int i=0; i < M.mesh.x_coordinates.size() ; i++ )
 		{
-   // Thomas solver, y-direction
+			// Thomas solver, y-direction
 
-	// remaining part of forward elimination, using pre-computed quantities 
+			// remaining part of forward elimination, using pre-computed quantities 
 
-	int n = M.voxel_index(i,0,k);
-	(*M.p_density_vectors)[n] /= M.thomas_denomy[0]; 
+			int n = M.voxel_index(i,0,k);
+			(*M.p_density_vectors)[n] /= M.thomas_denomy[0]; 
 
-	for( unsigned int j=1; j < M.mesh.y_coordinates.size() ; j++ )
-	{
-		n = M.voxel_index(i,j,k); 
-		axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_j_jump] ); 
-		(*M.p_density_vectors)[n] /= M.thomas_denomy[j]; 
+			for( unsigned int j=1; j < M.mesh.y_coordinates.size() ; j++ )
+			{
+				n = M.voxel_index(i,j,k); 
+				axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_j_jump] ); 
+				(*M.p_density_vectors)[n] /= M.thomas_denomy[j]; 
+			}
+
+			// back substitution 
+			// n = voxel_index( mesh.x_coordinates.size()-2 ,j,k); 
+
+			for( int j = M.mesh.y_coordinates.size()-2 ; j >= 0 ; j-- )
+			{
+				n = M.voxel_index(i,j,k); 
+				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cy[j] , (*M.p_density_vectors)[n+M.thomas_j_jump] ); 
+			}
+
+		}
 	}
 
-	// back substitution 
-	// n = voxel_index( mesh.x_coordinates.size()-2 ,j,k); 
+	end = omp_get_wtime();
+	time_LOD_3D_y += (end - start);
+	total_parallel_time_in_BioFVM_solvers += (end - start);
 
-	for( int j = M.mesh.y_coordinates.size()-2 ; j >= 0 ; j-- )
-	{
-		n = M.voxel_index(i,j,k); 
-		naxpy( &(*M.p_density_vectors)[n] , M.thomas_cy[j] , (*M.p_density_vectors)[n+M.thomas_j_jump] ); 
-	}
-
-  }
- }
-
- // z-diffusion 
+	// z-diffusion 
 
 	M.apply_dirichlet_conditions();
- #pragma omp parallel for 
- for( unsigned int j=0; j < M.mesh.y_coordinates.size() ; j++ )
- {
-	 
-  for( unsigned int i=0; i < M.mesh.x_coordinates.size() ; i++ )
-  {
-   // Thomas solver, y-direction
 
-	// remaining part of forward elimination, using pre-computed quantities 
+	start = omp_get_wtime();
 
-	int n = M.voxel_index(i,j,0);
-	(*M.p_density_vectors)[n] /= M.thomas_denomz[0]; 
-
-	// should be an empty loop if mesh.z_coordinates.size() < 2  
-	for( unsigned int k=1; k < M.mesh.z_coordinates.size() ; k++ )
+	#pragma omp parallel for 
+	for( unsigned int j=0; j < M.mesh.y_coordinates.size() ; j++ )
 	{
-		n = M.voxel_index(i,j,k); 
-		axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_k_jump] ); 
-		(*M.p_density_vectors)[n] /= M.thomas_denomz[k]; 
+		
+		for( unsigned int i=0; i < M.mesh.x_coordinates.size() ; i++ )
+		{
+			// Thomas solver, y-direction
+
+			// remaining part of forward elimination, using pre-computed quantities 
+
+			int n = M.voxel_index(i,j,0);
+			(*M.p_density_vectors)[n] /= M.thomas_denomz[0]; 
+
+			// should be an empty loop if mesh.z_coordinates.size() < 2  
+			for( unsigned int k=1; k < M.mesh.z_coordinates.size() ; k++ )
+			{
+				n = M.voxel_index(i,j,k); 
+				axpy( &(*M.p_density_vectors)[n] , M.thomas_constant1 , (*M.p_density_vectors)[n-M.thomas_k_jump] ); 
+				(*M.p_density_vectors)[n] /= M.thomas_denomz[k]; 
+			}
+
+			// back substitution 
+
+			// should be an empty loop if mesh.z_coordinates.size() < 2 
+			for( int k = M.mesh.z_coordinates.size()-2 ; k >= 0 ; k-- )
+			{
+				n = M.voxel_index(i,j,k); 
+				naxpy( &(*M.p_density_vectors)[n] , M.thomas_cz[k] , (*M.p_density_vectors)[n+M.thomas_k_jump] ); 
+				// n -= i_jump; 
+			}
+		}
 	}
 
-	// back substitution 
-
-	// should be an empty loop if mesh.z_coordinates.size() < 2 
-	for( int k = M.mesh.z_coordinates.size()-2 ; k >= 0 ; k-- )
-	{
-		n = M.voxel_index(i,j,k); 
-		naxpy( &(*M.p_density_vectors)[n] , M.thomas_cz[k] , (*M.p_density_vectors)[n+M.thomas_k_jump] ); 
-		// n -= i_jump; 
-	}
-  }
- }
+	end = omp_get_wtime();
+	time_LOD_3D_z += (end - start);
+	total_parallel_time_in_BioFVM_solvers += (end - start);
  
 	M.apply_dirichlet_conditions();
 	
@@ -384,6 +415,9 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 	
 	M.apply_dirichlet_conditions();
 
+	double start, end;
+	start = omp_get_wtime();
+
 	// x-diffusion 
 	#pragma omp parallel for 
 	for( unsigned int j=0; j < M.mesh.y_coordinates.size() ; j++ )
@@ -412,9 +446,17 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 		}
 	}
 
+
+	end = omp_get_wtime();
+	time_LOD_2D_x += (end - start);
+	total_parallel_time_in_BioFVM_solvers += (end - start);
+
 	// y-diffusion 
 
 	M.apply_dirichlet_conditions();
+
+	start = omp_get_wtime();
+
 	#pragma omp parallel for 
 	for( unsigned int i=0; i < M.mesh.x_coordinates.size() ; i++ )
 	{
@@ -442,6 +484,10 @@ void diffusion_decay_solver__constant_coefficients_LOD_2D( Microenvironment& M, 
 			n -= M.thomas_j_jump; 
 		}
 	}
+
+	end = omp_get_wtime();
+	time_LOD_2D_y += (end - start);
+	total_parallel_time_in_BioFVM_solvers += (end - start);
 
 	M.apply_dirichlet_conditions();
 	
@@ -496,6 +542,8 @@ void diffusion_decay_explicit_uniform_rates( Microenvironment& M, double dt )
 
 	static vector<double> constant4 = M.one - dt * M.decay_rates;
 
+	double start = omp_get_wtime();
+
 	#pragma omp parallel for
 	for( unsigned int i=0; i < (*(M.p_density_vectors)).size() ; i++ )
 	{
@@ -514,6 +562,10 @@ void diffusion_decay_explicit_uniform_rates( Microenvironment& M, double dt )
 		temp *= d1; 
 		axpy( &(*pNew)[i] , temp , (*pOld)[i] ); 
 	}
+
+	double end = omp_get_wtime(); 
+	time_explicit_uniform_rates += (end - start);
+	total_parallel_time_in_BioFVM_solvers += (end - start);
 	
 	// reset gradient vectors 
 //	M.reset_all_gradient_vectors(); 
@@ -589,6 +641,8 @@ void diffusion_decay_solver__constant_coefficients_LOD_1D( Microenvironment& M, 
 	
 	M.apply_dirichlet_conditions();
 
+	double start = omp_get_wtime();
+
 	// x-diffusion 
 	#pragma omp parallel for 
 	for( unsigned int j=0; j < M.mesh.y_coordinates.size() ; j++ )
@@ -616,6 +670,10 @@ void diffusion_decay_solver__constant_coefficients_LOD_1D( Microenvironment& M, 
 			n -= M.thomas_i_jump; 
 		}
 	}
+
+	double end = omp_get_wtime();
+	time_LOD_1D += (end-start);
+	total_parallel_time_in_BioFVM_solvers += (end-start);
 
 	M.apply_dirichlet_conditions();
 	
