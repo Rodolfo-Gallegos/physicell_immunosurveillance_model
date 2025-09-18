@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+REAL_PATH=`readlink -f $0`
+PARAVER_HOME="$( cd "$( dirname "$REAL_PATH" )" && pwd )"
+PARAVER_HOME=${PARAVER_HOME%/bin}
+
+if [ -d "${PARAVER_HOME}/lib/paraver-kernel" ] ; then
+  LIB_DIR=lib
+elif [ -d "${PARAVER_HOME}/lib64/paraver-kernel" ] ; then
+  LIB_DIR=lib64
+else
+  echo "paraver-kernel libraries not found in \$PARAVER_HOME/{lib,lib64}/paraver-kernel/"
+  exit 1
+fi
+
+if ! [ -e ${PARAVER_HOME}/bin/paramedir.bin ] ; then
+  echo "paramedir binary not found in \$PARAVER_HOME/bin/"
+  exit 1
+fi
+
+
+
+LD_LIBRARY_PATH="$PARAVER_HOME/${LIB_DIR}/paraver-kernel:$LD_LIBRARY_PATH" "$PARAVER_HOME/bin/paramedir.bin" "$@"	

@@ -1,0 +1,35 @@
+#!/usr/bin/env sh
+
+REAL_PATH=`readlink -f "${0}"`
+PARAVER_HOME="$( cd "$( dirname "$REAL_PATH" )" && pwd )"
+export PARAVER_HOME=${PARAVER_HOME%/bin}
+
+if [ -d "${PARAVER_HOME}/lib/paraver-kernel" ] ; then
+  LIB_DIR=lib
+elif [ -d "${PARAVER_HOME}/lib64/paraver-kernel" ] ; then
+  LIB_DIR=lib64
+else
+  echo "paraver-kernel libraries not found in \$PARAVER_HOME/{lib,lib64}/paraver-kernel/"
+  exit 1
+fi
+
+if ! [ -e "${PARAVER_HOME}/bin/wxparaver.bin" ] ; then
+  echo "wxparaver binary not found in \$PARAVER_HOME/bin/"
+  exit 1
+fi
+
+
+# workspaces.xml missing tag check - Added in 4.8.2
+USER_WRKSPACES="${HOME}/.paraver/workspaces.xml"
+if [ -f "${USER_WRKSPACES}" ] ; then
+  NUM_BOOST_FINAL_CLOSE_TAG=$( grep '</boost_serialization>' ${USER_WRKSPACES} | wc -l )
+  if [ $NUM_BOOST_FINAL_CLOSE_TAG -eq 0 ]; then
+    echo "</boost_serialization>" >> ${USER_WRKSPACES}
+  fi
+fi
+
+
+
+
+LD_LIBRARY_PATH="${PARAVER_HOME}/${LIB_DIR}/paraver-kernel:${PARAVER_HOME}/${LIB_DIR}/wxparaver:$LD_LIBRARY_PATH" "${PARAVER_HOME}/bin/wxparaver.bin" "$@"
+	
