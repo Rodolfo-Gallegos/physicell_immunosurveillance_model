@@ -70,7 +70,7 @@ To use this model:
 
 The general command is:
 ```sh
-make load PROJ=tumor_immune_extended && make && ./project
+make load PROJ=Extended_Cess_Finley_model && make && ./project
 ```
 This command loads the extended tumor-immune model, compiles it, and runs a simulation with the default configuration file (`config/PhysiCell_settings.xml`).
 
