@@ -9,11 +9,13 @@ PhysiCell/project
 PhysiCell/outputs
 PhysiCell/sh
 .vscode
+GEMINI.md
 
 EDIESCA_2025
 Notebooks
 Scripts
 csv
+README_og.md
 
 *.nsys-rep
 *.sqlite
