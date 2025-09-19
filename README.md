@@ -47,20 +47,25 @@ A 7,600-run MPSA was conducted to identify the most critical rules governing tum
 
 The MPSA revealed that **IL-10 signaling is the dominant regulator of tumor burden**. Specifically, rules governing IL-10-mediated T cell exhaustion were the most sensitive. Modulating the sensitivity of T cells to IL-10 (by increasing the half-max parameter) halved the final tumor count, suggesting a potent therapeutic target.
 
-### Additional Simulation Results
-The following images show further results from the MPSA, comparing different rule sensitivities and their impact on the simulation dynamics.
+### In-Depth Analysis: IL-10 Regulation of T Cell Activity
 
-**MPSA Time-course Dynamics**
-![MPSA Time-course](images/timeline_cells_1vs4.png)
-*A grid of time-series plots from the MPSA, showing cell population dynamics over 5 days. The axes vary the sensitivities for IL-10's inhibition of T cell activation and its inhibition of tumor attack, highlighting how these rules shape the tumor's growth trajectory.*
+The following results provide a detailed comparison of two key IL-10-mediated rules identified as highly sensitive in the MPSA:
+1.  **IL-10 $\downarrow$ Attack tumor:** IL-10 inhibits the ability of Active T cells to kill tumor cells (x-axis).
+2.  **IL-10 $\downarrow \to$ Active T cell:** IL-10 inhibits the differentiation of Naive T cells into Active T cells (y-axis).
 
-**Rule Comparison: M1 vs. M2 Polarization**
-These results compare the impact of two different M0 macrophage polarization rules on the overall cell population dynamics and spatial distribution.
+The figures below show the simulation outcomes across a 4x4 grid where the half-max factor for these two rules is varied (0.2, 0.5, 2.0, 5.0), illustrating their combined impact on tumor fate from different perspectives.
+
+**Final Tumor Burden (Heatmap)**
 ![Heatmap Comparison](images/avgs_heatmaps_rule1_vs_rule4.png)
-*Average final agent counts comparing two different rule sets.*
+*Heatmap showing the average final tumor cell count for each of the 16 rule combinations. Darker red indicates a higher tumor burden, showing that lower sensitivity to IL-10 (higher half-max factor) leads to better tumor control.*
 
+**Final Spatial Distribution**
 ![Simulation Comparison](images/simulations_rule1_vs_rule4.png)
-*Final simulation snapshots comparing the spatial outcomes of the two rule sets.*
+*Snapshots of the final simulation state (120 hours) for each rule combination, illustrating the impact on the spatial organization of the tumor and immune cells.*
+
+**Population Dynamics Over Time**
+![Timeline Comparison](images/timeline_cells_1vs4.png)
+*Time-series plots showing the counts of Tumor, Active T, and Exhausted T cells over the 5-day simulation for each of the 16 configurations. This view reveals how the population dynamics shift in response to changes in IL-10 signaling sensitivity.*
 
 ## How to Run the Model
 To use this model:
