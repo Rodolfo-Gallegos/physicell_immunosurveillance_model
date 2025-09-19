@@ -13,7 +13,7 @@ This work has been presented in the following article:
 
 The model simulates the interactions between tumor cells, macrophages (M0, M1, M2), and T cells (naive, active, exhausted) in a 2D environment. Cell behavior is governed by a set of 31 rules based on the cell behavior grammar proposed by Johnson et al., which use Hill-type functions to capture nonlinear signaling responses to cytokines (IL-4, IFN-γ, IL-10) and local cell-cell contact.
 
-![Model Diagram](images/Extended_Cess_Finley_H.png)
+![Model Diagram](images/Extended_Cess_Finley.png)
 *Schematic of the extended Cess-Finley model. (A) Macrophage differentiation pathways. (B) Cell interaction network.*
 
 A custom immune cell recruitment mechanism is implemented, where naive T cell infiltration is triggered by tumor cell death (Michaelis-Menten kinetics) and M0 macrophage recruitment is proportional to the live tumor cell count.
