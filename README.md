@@ -50,20 +50,17 @@ The MPSA revealed that **IL-10 signaling is the dominant regulator of tumor burd
 ### Additional Simulation Results
 The following images show further results from the MPSA, comparing different rule sensitivities and their impact on the simulation dynamics.
 
-**MPSA Simulation Grid**
-![MPSA Grid](images/combined_grid.png)
-*A grid of final simulation states from the MPSA, showing the effect of varying sensitivities for IL-10's inhibition of T cell activation and tumor attack.*
+**MPSA Time-course Dynamics**
+![MPSA Time-course](images/timeline_cells_1vs4.png)
+*A grid of time-series plots from the MPSA, showing cell population dynamics over 5 days. The axes vary the sensitivities for IL-10's inhibition of T cell activation and its inhibition of tumor attack, highlighting how these rules shape the tumor's growth trajectory.*
 
-**Rule Comparison**
-These results compare the impact of two different rules on the overall cell population dynamics and spatial distribution.
+**Rule Comparison: M1 vs. M2 Polarization**
+These results compare the impact of two different M0 macrophage polarization rules on the overall cell population dynamics and spatial distribution.
 ![Heatmap Comparison](images/avgs_heatmaps_rule1_vs_rule4.png)
 *Average final agent counts comparing two different rule sets.*
 
 ![Simulation Comparison](images/simulations_rule1_vs_rule4.png)
 *Final simulation snapshots comparing the spatial outcomes of the two rule sets.*
-
-![Timeline Comparison](images/timeline_cells_1vs4.png)
-*Cell counts over time, comparing the population dynamics resulting from the two different rules.*
 
 ## How to Run the Model
 To use this model:
