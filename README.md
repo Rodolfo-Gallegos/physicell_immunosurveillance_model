@@ -21,7 +21,7 @@ A custom immune cell recruitment mechanism is implemented, where naive T cell in
 ### Baseline Simulation
 The following snapshots show a baseline simulation with 1,000 tumor cells (grey), 200 M0 macrophages (red), and 200 naive T cells (blue) over 120 virtual hours.
 
-![Baseline Simulation](images/Baseline.pdf)
+![Baseline Simulation](images/Baseline.png)
 
 ## Key Results
 
@@ -37,12 +37,12 @@ The optimizations achieved a **6.15x speedup** on 8 CPU cores in strong scaling 
 
 These performance gains reduced the runtime of the Multi-Parameter Sensitivity Analysis from over 32 days to under 8 days. The complete simulation workflow is outlined below:
 
-![Workflow](images/Workflow.pdf)
+![Workflow](images/Workflow.png)
 
 ### Biological Insights: Multi-Parameter Sensitivity Analysis (MPSA)
 A 7,600-run MPSA was conducted to identify the most critical rules governing tumor fate. The analysis involved scaling the half-max parameter of 10 key cytokine-mediated rules.
 
-![MPSA Results](images/MPSA.pdf)
+![MPSA Results](images/MPSA.png)
 *Heatmap of the MPSA results. Color encodes the average final tumor count, with blue indicating tumor regression and red indicating growth.*
 
 The MPSA revealed that **IL-10 signaling is the dominant regulator of tumor burden**. Specifically, rules governing IL-10-mediated T cell exhaustion were the most sensitive. Modulating the sensitivity of T cells to IL-10 (by increasing the half-max parameter) halved the final tumor count, suggesting a potent therapeutic target.
